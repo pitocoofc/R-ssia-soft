@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOOST // CORE</title>
+<meta name="theme-color" content="#00ffcc">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Share Tech Mono', monospace;
+}
+
+body{
+  background:radial-gradient(circle at center,#020202,#000);
+  color:#00ffcc;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* LOGIN */
+#login{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#login button{
+  padding:15px 40px;
+  font-size:1.1em;
+  border:1px solid #00ffcc;
+  background:none;
+  color:#00ffcc;
+  cursor:pointer;
+}
+
+#login button:hover{
+  background:#00ffcc22;
+}
+
+/* HOTBAR */
+#hotbar{
+  position:fixed;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  display:none;
+  gap:10px;
+}
+
+.app{
+  width:50px;
+  height:50px;
+  border:1px solid #00ffcc;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 0 10px #00ffcc44;
+}
+
+.app:hover{
+  background:#00ffcc22;
+}
+
+/* WINDOW */
+#window{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.hud{
+  width:90%;
+  max-width:420px;
+  border:1px solid #00ffcc55;
+  padding:20px;
+  box-shadow:0 0 25px #00ffcc44;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+button.opt{
+  width:100%;
+  margin:6px 0;
+  background:none;
+  border:1px solid #00ffcc;
+  color:#00ffcc;
+  padding:10px;
+  cursor:pointer;
+}
+
+button.opt:hover{
+  background:#00ffcc22;
+}
+
+#log{
+  margin-top:15px;
+  font-size:0.85em;
+  text-align:center;
+  opacity:0.8;
+}
+
+/* OPTIMIZE / INVASION */
+#optimize,
+#invasion{
+  position:fixed;
+  inset:0;
+  display:none;
+  background:#000;
+  padding:15px;
+}
+
+#terminal,
+#invTerminal{
+  height:60%;
+  overflow:hidden;
+  font-size:0.75em;
+}
+
+.bluebar{
+  width:100%;
+  height:14px;
+  border:1px solid #00aaff;
+  margin-top:10px;
+}
+
+#bluefill,
+#bluefillInv{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00aaff,#33ccff);
+  transition:width 0.1s;
+}
+
+/* NOTIFY */
+#notify{
+  position:fixed;
+  top:15px;
+  right:15px;
+  background:#001b22;
+  border:1px solid #00ffcc;
+  padding:10px 14px;
+  display:none;
+  box-shadow:0 0 15px #00ffcc55;
+  font-size:0.8em;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <button onclick="enter()">Для входа</button>
+</div>
+
+<!-- HOTBAR -->
+<div id="hotbar">
+  <div class="app" onclick="openApp()">A</div>
+  <div class="app" onclick="openApp()">B</div>
+  <div class="app" onclick="openApp()">C</div>
+</div>
+
+<!-- APP WINDOW -->
+<div id="window">
+  <div class="hud">
+    <h1>BOOST // CORE</h1>
+    <button class="opt" onclick="closeApp()">Закрыть</button>
+    <button class="opt" onclick="startInvasion()">Вторжение</button>
+    <button class="opt" onclick="startOptimization()">Оптимизация</button>
+    <div id="log">Ожидание команды...</div>
+  </div>
+</div>
+
+<!-- OPTIMIZATION -->
+<div id="optimize">
+  <div id="terminal"></div>
+  <div class="bluebar"><div id="bluefill"></div></div>
+</div>
+
+<!-- INVASION -->
+<div id="invasion">
+  <div id="invTerminal"></div>
+  <div class="bluebar"><div id="bluefillInv"></div></div>
+
+  <div id="invInput" style="display:none;margin-top:10px">
+    <input id="invName" placeholder="Имя цели"
+      style="width:100%;padding:8px;background:#000;border:1px solid #00ffcc;color:#00ffcc">
+    <button class="opt" onclick="askInvConfirm()">Продолжить</button>
+  </div>
+
+  <div id="invConfirm" style="display:none;margin-top:10px">
+    <div id="invText"></div>
+    <button class="opt" onclick="confirmInvasion()">Подтвердить</button>
+    <button class="opt" onclick="cancelInvasion()">Отмена</button>
+  </div>
+
+  <pre id="invFinal" style="display:none;margin-top:10px"></pre>
+</div>
+
+<!-- NOTIFY -->
+<div id="notify">Оптимизация применена</div>
+
+<script>
+const login = document.getElementById("login");
+const hotbar = document.getElementById("hotbar");
+const windowBox = document.getElementById("window");
+const optimize = document.getElementById("optimize");
+const invasion = document.getElementById("invasion");
+const terminal = document.getElementById("terminal");
+const invTerminal = document.getElementById("invTerminal");
+const bluefill = document.getElementById("bluefill");
+const bluefillInv = document.getElementById("bluefillInv");
+const invInput = document.getElementById("invInput");
+const invConfirm = document.getElementById("invConfirm");
+const invFinal = document.getElementById("invFinal");
+const invName = document.getElementById("invName");
+const invText = document.getElementById("invText");
+const notify = document.getElementById("notify");
+
+const lines = [
+  "@echo off",
+  "print(\"случайная фраза\")",
+  "const core = true;",
+  "System.out.println(\"OK\")",
+  "λ Ξ Ø ▓▒░",
+  "allocating memory...",
+  "cleaning cache...",
+  "rewriting sectors..."
+];
+
+const invBase = [
+  "@echo off","scan ports...","λ Ξ ▓▒░","buffer ready"
+];
+
+const invHeavy = [
+  "injecting payload...",
+  "bypassing firewall...",
+  "decrypting hash...",
+  "root access granted"
+];
+
+function enter(){
+  login.style.display="none";
+  hotbar.style.display="flex";
+}
+
+function openApp(){
+  windowBox.style.display="flex";
+}
+
+function closeApp(){
+  windowBox.style.display="none";
+}
+
+function startOptimization(){
+  windowBox.style.display="none";
+  optimize.style.display="block";
+  terminal.innerHTML="";
+  bluefill.style.width="0%";
+
+  let p=0;
+  let i=setInterval(()=>{
+    addLine(terminal,lines);
+    bluefill.style.width=p+"%";
+    p+=2;
+    if(p>=100){
+      clearInterval(i);
+      setTimeout(()=>{
+        optimize.style.display="none";
+        login.style.display="flex";
+        notify.style.display="block";
+        setTimeout(()=>notify.style.display="none",3000);
+      },600);
+    }
+  },100);
+}
+
+function startInvasion(){
+  windowBox.style.display="none";
+  invasion.style.display="block";
+  invTerminal.innerHTML="";
+  bluefillInv.style.width="0%";
+  invInput.style.display="none";
+  invConfirm.style.display="none";
+  invFinal.style.display="none";
+
+  let p=0;
+  let i=setInterval(()=>{
+    addLine(invTerminal,invBase);
+    bluefillInv.style.width=p+"%";
+    p+=3;
+    if(p>=100){
+      clearInterval(i);
+      invInput.style.display="block";
+    }
+  },90);
+}
+
+function askInvConfirm(){
+  invInput.style.display="none";
+  invConfirm.style.display="block";
+  invText.innerText="Желаете атаковать "+(invName.value||"UNKNOWN")+"?";
+}
+
+function confirmInvasion(){
+  invConfirm.style.display="none";
+  let p=0;
+  let i=setInterval(()=>{
+    addLine(invTerminal,invHeavy);
+    bluefillInv.style.width=p+"%";
+    p+=5;
+    if(p>=100){
+      clearInterval(i);
+      invFinal.style.display="block";
+
+      const target = invName.value || "UNKNOWN";
+      const pass = Math.floor(Math.random()*900000+100000);
+const pa = Math.floor(Math.random()*1+25);
+
+      invFinal.textContent = `
+In- (${target})
+Pas;! (${pa})
+Jk = ('/Pas')- (5)/"Pass"\\
+V;+ = Jk, Pas y In/(:!:)
+Sucess
+Password: ${pass}
+      `;
+    }
+  },50);
+}
+
+function cancelInvasion(){
+  invasion.style.display="none";
+  windowBox.style.display="flex";
+}
+
+function addLine(el,arr){
+  let d=document.createElement("div");
+  d.textContent=arr[Math.floor(Math.random()*arr.length)];
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+</script>
+
+</body>
+  </html>
